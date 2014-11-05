@@ -28,6 +28,8 @@ class Assembler:
         for line in self.file_all_line:
             line_col = line.split():
             if len(line_col) == 3:
+                # Store new label here
+                label[line_col[0]] = #something
                 pass
             elif len(line_col) == 2:
                 pass
