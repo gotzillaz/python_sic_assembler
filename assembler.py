@@ -25,7 +25,16 @@ class Assembler:
 
 #### Pass 1 ####
     def passOne(self):
-        pass
+        for line in self.file_all_line:
+            line_col = line.split():
+            if len(line_col) == 3:
+                pass
+            elif len(line_col) == 2:
+                pass
+            elif len(line_col) == 1:
+                pass
+            else:
+                pass
         
 #### Pass 2 ####
     def passTwo(self):
