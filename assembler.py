@@ -29,13 +29,13 @@ class Assembler:
 #### Pass 1 ####
     def passOne(self):
         for line in self.file_all_line:
-            line_col = line.split():
+            line_col = line.split()
             if len(line_col) == 3:
                 if(line_col[1] == 'START'):
                     self.LOCCTR = int(line_col[2], 16)
                     self.start = self.LOCCTR
                 # Store new label here
-                label[line_col[0]] = self.LOCCTR 
+                self.label[line_col[0]] = self.LOCCTR 
             elif len(line_col) == 2:
                 line_col = [''] + line_col
             elif len(line_col) == 1:
@@ -46,15 +46,17 @@ class Assembler:
                 self.LOCCTR += 3
             elif line_col[1] == 'RESW':
                 self.LOCCTR += 3 * int(line_col[2], 16)
-            elif line_col[1] == 'RESW':
+            elif line_col[1] == 'RESB':
                 self.LOCCTR += int(line_col[2], 16)
             elif line_col[1] == 'BYTE':
-                if line_col[2][0] == 'X':
-                    self.LOCCTR += len(line_col[2]-3)/2
-                elif line_col[2][0] == 'C':
-                    self.LOCCTR += len(line_col[2]-3)
+                #print len(line_col[2].strip()),
+                if line_col[2].strip()[0] == 'X':
+                    self.LOCCTR += (len(line_col[2].strip())-3)/2
+                elif line_col[2].strip()[0] == 'C':
+                    self.LOCCTR += len(line_col[2].strip())-3
             else:
                 self.LOCCTR += 3
+            print "NOW : " + line + " " + str(hex(self.LOCCTR))
         self.length = self.LOCCTR - self.start
         
 #### Pass 2 ####
@@ -66,5 +68,6 @@ class Assembler:
         return self.opcode[mnemonic]
 
 obj = Assembler('1.in')
+obj.passOne()
 print obj.file_all_line
-print obj.getOpCode('ADD')
+print obj.length
