@@ -6,6 +6,9 @@ class Assembler:
     label = {}
     TA = 0
     PC = 0
+    LOCCTR = 0
+    start = 0
+    length = 0
 
 #### Initalize ####
     def __init__(self, file_name):
@@ -28,15 +31,31 @@ class Assembler:
         for line in self.file_all_line:
             line_col = line.split():
             if len(line_col) == 3:
+                if(line_col[1] == 'START'):
+                    self.LOCCTR = int(line_col[2], 16)
+                    self.start = self.LOCCTR
                 # Store new label here
-                label[line_col[0]] = #something
-                pass
+                label[line_col[0]] = self.LOCCTR 
             elif len(line_col) == 2:
-                pass
+                line_col = [''] + line_col
             elif len(line_col) == 1:
-                pass
+                line_col = [''] + line_col + ['']
+            if line_col[1] == 'END':
+                break
+            elif line_col[1] == 'WORD':
+                self.LOCCTR += 3
+            elif line_col[1] == 'RESW':
+                self.LOCCTR += 3 * int(line_col[2], 16)
+            elif line_col[1] == 'RESW':
+                self.LOCCTR += int(line_col[2], 16)
+            elif line_col[1] == 'BYTE':
+                if line_col[2][0] == 'X':
+                    self.LOCCTR += len(line_col[2]-3)/2
+                elif line_col[2][0] == 'C':
+                    self.LOCCTR += len(line_col[2]-3)
             else:
-                pass
+                self.LOCCTR += 3
+        self.length = self.LOCCTR - self.start
         
 #### Pass 2 ####
     def passTwo(self):
