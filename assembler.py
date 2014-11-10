@@ -34,20 +34,23 @@ class Assembler:
                 if(line_col[1] == 'START'):
                     self.LOCCTR = int(line_col[2], 16)
                     self.start = self.LOCCTR
+                    self.label[line_col[0]] = self.LOCCTR 
+                    continue
                 # Store new label here
                 self.label[line_col[0]] = self.LOCCTR 
             elif len(line_col) == 2:
                 line_col = [''] + line_col
             elif len(line_col) == 1:
                 line_col = [''] + line_col + ['']
+            print "NOW : " + line + " " + str(hex(self.LOCCTR))
             if line_col[1] == 'END':
                 break
             elif line_col[1] == 'WORD':
                 self.LOCCTR += 3
             elif line_col[1] == 'RESW':
-                self.LOCCTR += 3 * int(line_col[2], 16)
+                self.LOCCTR += 3 * int(line_col[2])
             elif line_col[1] == 'RESB':
-                self.LOCCTR += int(line_col[2], 16)
+                self.LOCCTR += int(line_col[2])
             elif line_col[1] == 'BYTE':
                 #print len(line_col[2].strip()),
                 if line_col[2].strip()[0] == 'X':
@@ -56,7 +59,6 @@ class Assembler:
                     self.LOCCTR += len(line_col[2].strip())-3
             else:
                 self.LOCCTR += 3
-            print "NOW : " + line + " " + str(hex(self.LOCCTR))
         self.length = self.LOCCTR - self.start
         
 #### Pass 2 ####
