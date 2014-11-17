@@ -81,7 +81,7 @@ class Assembler:
                 line_col = [''] + line_col + ['']
             elif len(line_col) == 0:
                 continue    
-            print line,
+            #print line
             if line_col[1] == 'END':
                 pass
             elif line_col[1] == 'WORD':
@@ -112,13 +112,30 @@ class Assembler:
                     object_code += bin(self.SYMTAB[line_col[2].strip()])[2:].zfill(15)
                 else:
                     object_code += bin(int(line_col[2].strip(),16))[2:].zfill(15)
-                object_code = hex(int(object_code,2))[2:].zfill(6)
+                object_code = hex(int(object_code, 2))[2:].zfill(6)
                 self.object_codes.append(object_code)
-            print object_code
+            #print object_code
                 
 #### Get & Set ####
     def getOpCode(self, mnemonic):
         return self.OPTAB[mnemonic]
+
+    def createListingFile(self):
+        i = 0
+        for line in self.file_all_line:
+            line_col = line.split()
+            if len(line_col) == 1:
+                line_col = [''] + line_col + ['']
+            elif len(line_col) == 2:
+                line_col = [''] + line_col
+            elif len(line_col) == 0:
+                continue
+            tmp = '\t'.join(line_col)+'\t'
+            if i != -1:
+                print tmp + self.object_codes[i-1]
+            else:
+                print tmp
+            i += 1
 
 obj = Assembler('1.in')
 obj.passOne()
@@ -126,3 +143,4 @@ obj.passTwo()
 print obj.file_all_line
 print obj.length
 print obj.location
+obj.createListingFile()
