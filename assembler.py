@@ -131,16 +131,18 @@ class Assembler:
             elif len(line_col) == 0:
                 continue
             tmp = '\t'.join(line_col)+'\t'
-            if i != -1:
-                print tmp + self.object_codes[i-1]
+            if i+1 < len(self.file_all_line):
+                print tmp + self.object_codes[i]
             else:
                 print tmp
+            #print i,len(self.file_all_line)
             i += 1
 
 obj = Assembler('1.in')
 obj.passOne()
 obj.passTwo()
-print obj.file_all_line
+print obj.file_all_line ,len(obj.file_all_line)
+print obj.object_codes, len(obj.object_codes)
 print obj.length
 print obj.location
 obj.createListingFile()
