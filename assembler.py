@@ -93,7 +93,7 @@ class Assembler:
                 self.object_codes.append('')
             elif line_col[1] == 'BYTE':
                 if line_col[2].strip()[0] == 'X':
-                    object_code = hex(int(line_col[2].strip()[2:-1],16))[2:].upper()
+                    object_code = hex(int(line_col[2].strip()[2:-1],16))[2:].upper().zfill(len(line_col[2].strip()[2:-1]))
                     self.object_codes.append(object_code)
                 elif line_col[2].strip()[0] == 'C':
                     for i in line_col[2].strip()[2:-1]:
@@ -137,6 +137,9 @@ class Assembler:
                 print tmp
             #print i,len(self.file_all_line)
             i += 1
+
+    def createObjectFile(self):
+        pass
 
 obj = Assembler('1.in')
 obj.passOne()
