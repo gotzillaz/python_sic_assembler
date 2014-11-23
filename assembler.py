@@ -111,7 +111,12 @@ class Assembler:
                 if self.SYMTAB.has_key(line_col[2].strip()):
                     object_code += bin(self.SYMTAB[line_col[2].strip()])[2:].zfill(15)
                 else:
-                    object_code += bin(int(line_col[2].strip(),16))[2:].zfill(15)
+                    if line_col[2].strip()[-1] == 'h':
+                        object_code += bin(int(line_col[2].strip()[:-1],16))[2:].zfill(15)
+                    elif line_col[2].strip()[:2] == '0x':
+                        object_code += bin(int(line_col[2].strip()[2:],16))[2:].zfill(15)
+                    else:
+                        object_code += bin(int(line_col[2].strip()))[2:].zfill(15)
                 object_code = hex(int(object_code, 2))[2:].zfill(6)
                 self.object_codes.append(object_code)
             #print object_code
