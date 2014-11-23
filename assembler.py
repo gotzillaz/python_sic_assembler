@@ -194,6 +194,10 @@ class Assembler:
                     
             i += 1
         object_list = map(lambda x:x.upper(),object_list)
+        write_file = open('1.hex','w')
+        for line in object_list:
+            write_file.write(line+'\n')
+        write_file.close()
         print object_list
 
 obj = Assembler('1.in')
