@@ -60,7 +60,13 @@ class Assembler:
                 line_col = line.split()
                 if len(line_col) == 3:
                     if(line_col[1] == 'START'):
-                        self.LOCCTR = int(line_col[2], 16)
+                        if line_col[2].strip()[-1] == 'H':
+                            self.LOCCTR = int(line_col[2].strip()[:-1],16)
+                        elif line_col[2].strip()[:2] == '0X':
+                            self.LOCCTR = int(line_col[2].strip()[2:],16)
+                        else:
+                            self.LOCCTR = int(line_col[2].strip())
+                        #self.LOCCTR = int(line_col[2], 16)
                         self.start = self.LOCCTR
                         self.SYMTAB[line_col[0]] = self.LOCCTR 
                         self.location.append(self.LOCCTR)
