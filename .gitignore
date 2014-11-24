@@ -6,3 +6,4 @@
 *.asm
 assembler-1.py
 reference/
+test/

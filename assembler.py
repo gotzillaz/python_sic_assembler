@@ -207,7 +207,10 @@ class Assembler:
                 if len(line_col) == 1:
                     line_col = [''] + line_col + ['']
                 elif len(line_col) == 2:
-                    line_col = [''] + line_col
+                    if line_col[1] == 'RSUB':
+                        line_col = line_col + ['']
+                    else:
+                        line_col = [''] + line_col
                 elif len(line_col) == 0:
                     continue
                 tmp = '\t'.join(line_col)+'\t'
@@ -235,13 +238,17 @@ class Assembler:
         object_line = ''
         object_list = []
         point = 0
+        print "ABSOLUTE ~"
         for line in self.file_all_line:
             try:
                 line_col = line.split()
                 if len(line_col) == 1:
                     line_col = [''] + line_col + ['']
                 elif len(line_col) == 2:
-                    line_col = [''] + line_col
+                    if line_col[1] == 'RSUB':
+                        line_col = line_col + ['']
+                    else:
+                        line_col = [''] + line_col
                 elif len(line_col) == 0:
                     continue
                 if line_col[1] == 'START':
@@ -287,15 +294,20 @@ class Assembler:
     def createObjectFileRelocatable(self):
         i = 0
         object_line = ''
+        bitmask_line = ''
         object_list = []
         point = 0
+        print "RELOCATABLE ~"
         for line in self.file_all_line:
             try:
                 line_col = line.split()
                 if len(line_col) == 1:
                     line_col = [''] + line_col + ['']
                 elif len(line_col) == 2:
-                    line_col = [''] + line_col
+                    if line_col[1] == 'RSUB':
+                        line_col = line_col + ['']
+                    else:
+                        line_col = [''] + line_col
                 elif len(line_col) == 0:
                     continue
                 if line_col[1] == 'START':
@@ -304,24 +316,45 @@ class Assembler:
                     object_line = ''
                 elif line_col[1] == 'END':
                     if object_line != '':
-                        object_line = 'T' + hex(point)[2:].zfill(6) + hex(len(object_line)/2)[2:].zfill(2) +'000' + object_line
+                        calc_bitmask = hex(int(bitmask_line + '0'*(12-len(bitmask_line)), 2))[2:].zfill(3).upper()
+                        bitmask_line = ''
+                        object_line = 'T' + hex(point)[2:].zfill(6) + hex(len(object_line)/2)[2:].zfill(2) + calc_bitmask + object_line
                         object_list.append(object_line)
                         object_line = ''
                     object_line = 'E' + hex(self.execute)[2:].zfill(6)
                     object_list.append(object_line)
                 elif line_col[1] == 'RESW' or line_col[1] == 'RESB':
                     if object_line != '':
-                        object_line = 'T' + hex(point)[2:].zfill(6) + hex(len(object_line)/2)[2:].zfill(2) +'000' + object_line
+                        calc_bitmask = hex(int(bitmask_line + '0'*(12-len(bitmask_line)), 2))[2:].zfill(3).upper()
+                        bitmask_line = ''
+                        object_line = 'T' + hex(point)[2:].zfill(6) + hex(len(object_line)/2)[2:].zfill(2) + calc_bitmask + object_line
                         object_list.append(object_line)
                         object_line = ''
+                elif line_col[1] == 'WORD' or line_col[1] == 'BYTE':
+                    print 'YYYY' , object_line
+                    if object_line != '':
+                        calc_bitmask = hex(int(bitmask_line + '0'*(12-len(bitmask_line)), 2))[2:].zfill(3).upper()
+                        object_line = 'T' + hex(point)[2:].zfill(6) + hex(len(object_line)/2)[2:].zfill(2) + calc_bitmask + object_line
+                        object_list.append(object_line)
+                    point = self.location[i]
+                    bitmask_line = self.bitmask[i]
+                    calc_bitmask = hex(int(bitmask_line + '0'*(12-len(bitmask_line)), 2))[2:].zfill(3).upper()
+                    bitmask_line = ''
+                    object_line = self.object_codes[i]
+                    object_line = 'T' + hex(point)[2:].zfill(6) + hex(len(object_line)/2)[2:].zfill(2) + calc_bitmask + object_line
+                    object_list.append(object_line)
+                    object_line = ''
                 else:
                     if len(object_line) + len(self.object_codes[i]) > 60:
-                        object_line = 'T' + hex(point)[2:].zfill(6) + hex(len(object_line)/2)[2:].zfill(2) +'000' + object_line
+                        calc_bitmask = hex(int(bitmask_line + '0'*(12-len(bitmask_line)), 2))[2:].zfill(3).upper()
+                        bitmask_line = ''
+                        object_line = 'T' + hex(point)[2:].zfill(6) + hex(len(object_line)/2)[2:].zfill(2) + calc_bitmask + object_line
                         object_list.append(object_line)
                         object_line = ''
                     if object_line == '':
                         point = self.location[i]
                     object_line += self.object_codes[i]
+                    bitmask_line += self.bitmask[i]
                 i += 1
             except :
                 print '-' * 60
