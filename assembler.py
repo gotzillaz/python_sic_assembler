@@ -175,7 +175,7 @@ class Assembler:
             else:
                 listing_list.append('\t' + tmp)
             i += 1
-        write_file = open(argv[1][:-3]+'.lst','w')
+        write_file = open(argv[1][:-4]+'.lst','w')
         for line in listing_list:
             write_file.write(line+'\n')
         write_file.close()
@@ -220,7 +220,7 @@ class Assembler:
                 object_line += self.object_codes[i]
             i += 1
         object_list = map(lambda x:x.upper(),object_list)
-        write_file = open(argv[1][:-3]+'.obj','w')
+        write_file = open(argv[1][:-4]+'.obj','w')
         for line in object_list:
             write_file.write(line+'\n')
         write_file.close()
@@ -265,7 +265,7 @@ class Assembler:
                 object_line += self.object_codes[i]
             i += 1
         object_list = map(lambda x:x.upper(),object_list)
-        write_file = open(argv[1][:-3]+'.obj','w')
+        write_file = open(argv[1][:-4]+'.obj','w')
         for line in object_list:
             write_file.write(line+'\n')
         write_file.close()
@@ -273,6 +273,9 @@ class Assembler:
 
 if len(argv) <= 1:
     print "ERROR : Invalid argrument"
+    exit()
+if argv[1][-4:].upper() != '.ASM':
+    print "ERROR : Please Input file .ASM"
     exit()
 obj = Assembler(argv[1])
 obj.passOne()
