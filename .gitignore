@@ -4,4 +4,5 @@
 *.lst
 *.in
 *.asm
+assembler-1.py
 reference/

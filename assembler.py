@@ -1,4 +1,5 @@
-from sys import argv
+from sys import argv,stdout
+from traceback import print_exc
 
 class Assembler:
     file_all_line = []
@@ -7,6 +8,7 @@ class Assembler:
     LOCCTR = 0
     start = 0
     length = 0
+    execute = 0
     bitmask = ''
     object_codes = []
     location = []
@@ -15,15 +17,20 @@ class Assembler:
     def __init__(self, file_name):
         try :
             assembly_file = open(file_name, 'r')
-            self.file_all_line = map(lambda x: x.strip(), assembly_file.readlines())
+            self.file_all_line = map(lambda x: x.strip().upper(), assembly_file.readlines())
             self.initOpCode()
             print self.OPTAB
             assembly_file.close()
         except IOError:
+            print '-' * 60
             print "ERROR : File not found"
+            print '-' * 60
             exit()
         except :
+            print '-' * 60
             print "ERROR : Unknow error"
+            print_exc(file=stdout)
+            print '-' * 60
             exit()
 
     def initOpCode(self):
@@ -35,10 +42,15 @@ class Assembler:
                 self.OPTAB[key] = value
             sic_instruction_file.close()
         except IOError:
+            print '-' * 60
             print "ERROR : sic_instructions.txt not found"
+            print_exc(file=stdout)
+            print '-' * 60
             exit()
         except :
+            print '-' * 60
             print "ERROR : Unknow error"
+            print '-' * 60
             exit()
 
 #### Pass 1 ####
@@ -56,20 +68,24 @@ class Assembler:
                     # Store new SYMTAB here
                     self.SYMTAB[line_col[0]] = self.LOCCTR 
                 elif len(line_col) == 2:
-                    line_col = [''] + line_col
+                    if line_col[1] == 'RSUB':
+                        self.SYMTAB[line_col[0]] = self.LOCCTR
+                        line_col = line_col + ['']
+                    else:
+                        line_col = [''] + line_col
                 elif len(line_col) == 1:
                     line_col = [''] + line_col + ['']
                 elif len(line_col) == 0:
                     continue
                 self.location.append(self.LOCCTR) 
-                print "NOW : " + line + " " + str(hex(self.LOCCTR))
+                print "NOW : " + line + " " + str(hex(self.LOCCTR)), len(self.location)
                 if line_col[1] == 'END':
                     if self.SYMTAB.has_key(line_col[2].strip()):
                         self.execute = self.SYMTAB[line_col[2].strip()]
                     else :
-                        if line_col[2].strip()[-1] == 'h':
+                        if line_col[2].strip()[-1] == 'H':
                             self.execute = int(line_col[2].strip()[:-1],16)
-                        elif line_col[2].strip()[:2] == '0x':
+                        elif line_col[2].strip()[:2] == '0X':
                             self.execute = int(line_col[2].strip()[2:],16)
                         else:
                             self.execute = int(line_col[2].strip())
@@ -88,8 +104,11 @@ class Assembler:
                 else:
                     self.LOCCTR += 3
             except :
+                print '-' * 60
                 print "ERROR : Something went wrong in Pass I"
                 print "Line : " + line
+                print_exc(file=stdout)
+                print '-' * 60
                 exit()
         self.length = self.LOCCTR - self.start
         
@@ -105,7 +124,10 @@ class Assembler:
                         self.object_codes.append('')
                         continue
                 elif len(line_col) == 2:
-                    line_col = [''] + line_col
+                    if line_col[1] == 'RSUB':
+                        line_col = line_col + ['']
+                    else:
+                        line_col = [''] + line_col
                 elif len(line_col) == 1:
                     line_col = [''] + line_col + ['']
                 elif len(line_col) == 0:
@@ -140,17 +162,21 @@ class Assembler:
                     if self.SYMTAB.has_key(line_col[2].strip()):
                         object_code += bin(self.SYMTAB[line_col[2].strip()])[2:].zfill(15)
                     else:
-                        if line_col[2].strip()[-1] == 'h':
+                        if line_col[2].strip()[-1] == 'H':
                             object_code += bin(int(line_col[2].strip()[:-1],16))[2:].zfill(15)
-                        elif line_col[2].strip()[:2] == '0x':
+                        elif line_col[2].strip()[:2] == '0X':
                             object_code += bin(int(line_col[2].strip()[2:],16))[2:].zfill(15)
                         else:
                             object_code += bin(int(line_col[2].strip()))[2:].zfill(15)
                     object_code = hex(int(object_code, 2))[2:].zfill(6)
                     self.object_codes.append(object_code)
+                print self.object_codes[-1], line ,len(self.object_codes)
             except :
+                print '-' * 60
                 print "ERROR : Something went wrong in Pass II"
                 print "Line : " + line
+                print_exc(file=stdout)
+                print '-' * 60
                 exit()
             #print object_code
                 
@@ -162,19 +188,29 @@ class Assembler:
         i = 0
         listing_list = []
         for line in self.file_all_line:
-            line_col = line.split()
-            if len(line_col) == 1:
-                line_col = [''] + line_col + ['']
-            elif len(line_col) == 2:
-                line_col = [''] + line_col
-            elif len(line_col) == 0:
-                continue
-            tmp = '\t'.join(line_col)+'\t'
-            if i+1 < len(self.file_all_line):
-                listing_list.append(hex(self.location[i])[2:].zfill(4).upper() + '\t' + tmp + self.object_codes[i].upper())
-            else:
-                listing_list.append('\t' + tmp)
-            i += 1
+            try :
+                line_col = line.split()
+                print len(self.location) , i, hex(self.location[i]), len(self.object_codes),line
+                if len(line_col) == 1:
+                    line_col = [''] + line_col + ['']
+                elif len(line_col) == 2:
+                    line_col = [''] + line_col
+                elif len(line_col) == 0:
+                    continue
+                tmp = '\t'.join(line_col)+'\t'
+                if i < len(self.object_codes):
+                    #print len(self.location) , i, hex(self.location[i]), len(self.object_codes),line
+                    listing_list.append(hex(self.location[i])[2:].zfill(4).upper() + '\t' + tmp + self.object_codes[i].upper())
+                else:
+                    listing_list.append('\t' + tmp)
+                i += 1
+            except:
+                print '-' * 60
+                print "ERROR : Cannot create Listing file"
+                print "Line : " + line
+                print_exc(file=stdout)
+                print '-' * 60
+                exit()
         write_file = open(argv[1][:-4]+'.lst','w')
         for line in listing_list:
             write_file.write(line+'\n')
@@ -200,19 +236,19 @@ class Assembler:
                 object_line = ''
             elif line_col[1] == 'END':
                 if object_line != '':
-                    object_line = 'T' + hex(point)[2:].zfill(6) + hex(len(object_line)/2)[2:].zfill(2) + object_line
+                    object_line = 'T' + hex(point)[2:].zfill(6) + hex(len(object_line)/2)[2:].zfill(2) +'000' + object_line
                     object_list.append(object_line)
                     object_line = ''
                 object_line = 'E' + hex(self.execute)[2:].zfill(6)
                 object_list.append(object_line)
             elif line_col[1] == 'RESW' or line_col[1] == 'RESB':
                 if object_line != '':
-                    object_line = 'T' + hex(point)[2:].zfill(6) + hex(len(object_line)/2)[2:].zfill(2) + object_line
+                    object_line = 'T' + hex(point)[2:].zfill(6) + hex(len(object_line)/2)[2:].zfill(2) +'000' + object_line
                     object_list.append(object_line)
                     object_line = ''
             else:
                 if len(object_line) + len(self.object_codes[i]) > 60:
-                    object_line = 'T' + hex(point)[2:].zfill(6) + hex(len(object_line)/2)[2:].zfill(2) + object_line
+                    object_line = 'T' + hex(point)[2:].zfill(6) + hex(len(object_line)/2)[2:].zfill(2) +'000' + object_line
                     object_list.append(object_line)
                     object_line = ''
                 if object_line == '':
@@ -272,17 +308,22 @@ class Assembler:
         print object_list
 
 if len(argv) <= 1:
+    print '-' * 60
     print "ERROR : Invalid argrument"
+    print '-' * 60
     exit()
 if argv[1][-4:].upper() != '.ASM':
+    print '-' * 60
     print "ERROR : Please Input file .ASM"
+    print '-' * 60
     exit()
 obj = Assembler(argv[1])
 obj.passOne()
+print obj.SYMTAB
 obj.passTwo()
 print obj.file_all_line ,len(obj.file_all_line)
 print obj.object_codes, len(obj.object_codes)
 print obj.length
-print obj.location
+print obj.location, len(obj.location)
 obj.createListingFile()
 obj.createObjectFile()
