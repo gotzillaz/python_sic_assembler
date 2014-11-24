@@ -223,38 +223,47 @@ class Assembler:
         object_list = []
         point = 0
         for line in self.file_all_line:
-            line_col = line.split()
-            if len(line_col) == 1:
-                line_col = [''] + line_col + ['']
-            elif len(line_col) == 2:
-                line_col = [''] + line_col
-            elif len(line_col) == 0:
-                continue
-            if line_col[1] == 'START':
-                object_line = 'H' + line_col[0] + ' '*(6-len(line_col[0])) + hex(self.start)[2:].zfill(6) + hex(self.length)[2:].zfill(6)
-                object_list.append(object_line)
-                object_line = ''
-            elif line_col[1] == 'END':
-                if object_line != '':
-                    object_line = 'T' + hex(point)[2:].zfill(6) + hex(len(object_line)/2)[2:].zfill(2) +'000' + object_line
+            try:
+                line_col = line.split()
+                if len(line_col) == 1:
+                    line_col = [''] + line_col + ['']
+                elif len(line_col) == 2:
+                    line_col = [''] + line_col
+                elif len(line_col) == 0:
+                    continue
+                if line_col[1] == 'START':
+                    object_line = 'H' + line_col[0] + ' '*(6-len(line_col[0])) + hex(self.start)[2:].zfill(6) + hex(self.length)[2:].zfill(6)
                     object_list.append(object_line)
                     object_line = ''
-                object_line = 'E' + hex(self.execute)[2:].zfill(6)
-                object_list.append(object_line)
-            elif line_col[1] == 'RESW' or line_col[1] == 'RESB':
-                if object_line != '':
-                    object_line = 'T' + hex(point)[2:].zfill(6) + hex(len(object_line)/2)[2:].zfill(2) +'000' + object_line
+                elif line_col[1] == 'END':
+                    if object_line != '':
+                        object_line = 'T' + hex(point)[2:].zfill(6) + hex(len(object_line)/2)[2:].zfill(2) +'000' + object_line
+                        object_list.append(object_line)
+                        object_line = ''
+                    object_line = 'E' + hex(self.execute)[2:].zfill(6)
                     object_list.append(object_line)
-                    object_line = ''
-            else:
-                if len(object_line) + len(self.object_codes[i]) > 60:
-                    object_line = 'T' + hex(point)[2:].zfill(6) + hex(len(object_line)/2)[2:].zfill(2) +'000' + object_line
-                    object_list.append(object_line)
-                    object_line = ''
-                if object_line == '':
-                    point = self.location[i]
-                object_line += self.object_codes[i]
-            i += 1
+                elif line_col[1] == 'RESW' or line_col[1] == 'RESB':
+                    if object_line != '':
+                        object_line = 'T' + hex(point)[2:].zfill(6) + hex(len(object_line)/2)[2:].zfill(2) +'000' + object_line
+                        object_list.append(object_line)
+                        object_line = ''
+                else:
+                    if len(object_line) + len(self.object_codes[i]) > 60:
+                        object_line = 'T' + hex(point)[2:].zfill(6) + hex(len(object_line)/2)[2:].zfill(2) +'000' + object_line
+                        object_list.append(object_line)
+                        object_line = ''
+                    if object_line == '':
+                        point = self.location[i]
+                    object_line += self.object_codes[i]
+                i += 1
+            except :
+                print '-' * 60
+                print "ERROR : Cannot create Object file"
+                print "Line : " + line
+                print_exc(file=stdout)
+                print '-' * 60
+                exit()
+
         object_list = map(lambda x:x.upper(),object_list)
         write_file = open(argv[1][:-4]+'.obj','w')
         for line in object_list:
@@ -281,19 +290,19 @@ class Assembler:
                 object_line = ''
             elif line_col[1] == 'END':
                 if object_line != '':
-                    object_line = 'T' + hex(point)[2:].zfill(6) + hex(len(object_line)/2)[2:].zfill(2) + object_line
+                    object_line = 'T' + hex(point)[2:].zfill(6) + hex(len(object_line)/2)[2:].zfill(2) +'000' + object_line
                     object_list.append(object_line)
                     object_line = ''
                 object_line = 'E' + hex(self.execute)[2:].zfill(6)
                 object_list.append(object_line)
             elif line_col[1] == 'RESW' or line_col[1] == 'RESB':
                 if object_line != '':
-                    object_line = 'T' + hex(point)[2:].zfill(6) + hex(len(object_line)/2)[2:].zfill(2) + object_line
+                    object_line = 'T' + hex(point)[2:].zfill(6) + hex(len(object_line)/2)[2:].zfill(2) +'000' + object_line
                     object_list.append(object_line)
                     object_line = ''
             else:
                 if len(object_line) + len(self.object_codes[i]) > 60:
-                    object_line = 'T' + hex(point)[2:].zfill(6) + hex(len(object_line)/2)[2:].zfill(2) + object_line
+                    object_line = 'T' + hex(point)[2:].zfill(6) + hex(len(object_line)/2)[2:].zfill(2) +'000' + object_line
                     object_list.append(object_line)
                     object_line = ''
                 if object_line == '':
@@ -326,4 +335,7 @@ print obj.object_codes, len(obj.object_codes)
 print obj.length
 print obj.location, len(obj.location)
 obj.createListingFile()
-obj.createObjectFile()
+if obj.start != 0:
+    obj.createObjectFile()
+else :
+    obj.createObjectFileRelocatable()
