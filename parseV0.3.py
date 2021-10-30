@@ -102,12 +102,11 @@ def check_all(data):
                     
      #   print x   #         
                     
-
-script, filename = argv
-f = open(filename,'r+')
-data = prepare_data(f)
-check_mnemonic(data)
-check_label(data)
-check_all(data)
-#print data 
-f.close()
+if __name__ == '__main__':
+    filename = argv[1]
+    with open(filename, 'r+') as f:
+        data = prepare_data(f)
+        check_mnemonic(data)
+        check_label(data)
+        check_all(data)
+        #print data 

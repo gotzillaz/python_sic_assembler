@@ -16,17 +16,16 @@ class Assembler:
 #### Initalize ####
     def __init__(self, file_name):
         try :
-            assembly_file = open(file_name, 'r')
-            self.file_all_line = [x.strip().upper() for x in assembly_file.readlines()]
-            self.initOpCode()
-            print(self.OPTAB)
-            assembly_file.close()
+            with open(file_name, 'r') as assembly_file:
+                self.file_all_line = [x.strip().upper() for x in assembly_file.readlines()]
+                self.initOpCode()
+                print(self.OPTAB)
         except IOError:
             print('-' * 60)
             print("ERROR : File not found")
             print('-' * 60)
             exit()
-        except :
+        except:
             print('-' * 60)
             print("ERROR : Unknow error")
             print_exc(file=stdout)
@@ -35,12 +34,11 @@ class Assembler:
 
     def initOpCode(self):
         try :
-            sic_instruction_file = open('sic_instructions.txt','r')
-            sic_instruction_line = sic_instruction_file.readlines()
-            for iterator in sic_instruction_line:
-                key, value = iterator.split()
-                self.OPTAB[key] = value
-            sic_instruction_file.close()
+            with open('sic_instructions.txt', 'r') as sic_instruction_file:
+                sic_instruction_line = sic_instruction_file.readlines()
+                for iterator in sic_instruction_line:
+                    key, value = iterator.split()
+                    self.OPTAB[key] = value
         except IOError:
             print('-' * 60)
             print("ERROR : sic_instructions.txt not found")
@@ -233,10 +231,9 @@ class Assembler:
                 print_exc(file=stdout)
                 print('-' * 60)
                 exit()
-        write_file = open(argv[1][:-4]+'.lst','w')
-        for line in listing_list:
-            write_file.write(line+'\n')
-        write_file.close()
+        with open(argv[1][:-4]+'.lst', 'w') as write_file:
+            for line in listing_list:
+                write_file.write(line+'\n')
         print(listing_list)
 
     def createObjectFile(self):
@@ -291,10 +288,9 @@ class Assembler:
                 exit()
 
         object_list = [x.upper() for x in object_list]
-        write_file = open(argv[1][:-4]+'.obj','w')
-        for line in object_list:
-            write_file.write(line+'\n')
-        write_file.close()
+        with open(argv[1][:-4]+'.obj','w') as write_file:
+            for line in object_list:
+                write_file.write(line+'\n')
         print(object_list)
 
     def createObjectFileRelocatable(self):
@@ -371,32 +367,32 @@ class Assembler:
                 exit()
 
         object_list = [x.upper() for x in object_list]
-        write_file = open(argv[1][:-4]+'.obj','w')
-        for line in object_list:
-            write_file.write(line+'\n')
-        write_file.close()
+        with open(argv[1][:-4]+'.obj', 'w') as write_file:
+            for line in object_list:
+                write_file.write(line+'\n')
         print(object_list)
 
-if len(argv) <= 1:
-    print('-' * 60)
-    print("ERROR : Invalid argrument")
-    print('-' * 60)
-    exit()
-if argv[1][-4:].upper() != '.ASM':
-    print('-' * 60)
-    print("ERROR : Please Input file .ASM")
-    print('-' * 60)
-    exit()
-obj = Assembler(argv[1])
-obj.passOne()
-print(obj.SYMTAB)
-obj.passTwo()
-print(obj.file_all_line ,len(obj.file_all_line))
-print(obj.object_codes, len(obj.object_codes))
-print(obj.length)
-print(obj.location, len(obj.location))
-obj.createListingFile()
-if obj.start != 0:
-    obj.createObjectFile()
-else :
-    obj.createObjectFileRelocatable()
+if __name__ == '__main__':
+    if len(argv) <= 1:
+        print('-' * 60)
+        print("ERROR : Invalid argrument")
+        print('-' * 60)
+        exit()
+    if argv[1][-4:].upper() != '.ASM':
+        print('-' * 60)
+        print("ERROR : Please Input file .ASM")
+        print('-' * 60)
+        #exit()
+    obj = Assembler(argv[1])
+    obj.passOne()
+    print(obj.SYMTAB)
+    obj.passTwo()
+    print(obj.file_all_line ,len(obj.file_all_line))
+    print(obj.object_codes, len(obj.object_codes))
+    print(obj.length)
+    print(obj.location, len(obj.location))
+    obj.createListingFile()
+    if obj.start != 0:
+        obj.createObjectFile()
+    else :
+        obj.createObjectFileRelocatable()
