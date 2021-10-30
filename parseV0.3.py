@@ -31,47 +31,47 @@ def check_mnemonic(data):
     for line in data:
         x=line.split()
         if x[1] not in INSTR:
-            print 'no instruction support SIC',x
+            print('no instruction support SIC',x)
             exit()
 
 def check_label(data):
     for line in data:
         x = line.split()
         if len(x[0])>6:
-            print 'out of length Label',x
+            print('out of length Label',x)
             exit()
 
 def check_xmode(x):
     xmode = x[2].split(',')
     if len(xmode) == 2:
         if xmode[1] != 'X':
-            print xmode[1],'?'
+            print(xmode[1],'?')
             exit()
         return 1
     elif len(xmode) == 1:
         return 0
     else:
-        print 'xmode failed'
+        print('xmode failed')
         exit()
 
 def check_length_label(TA):
     if len(TA[0]) > 6 or (TA[0][0] in 'CX' and TA[0][-1] in '\''):
-        print 'error'
+        print('error')
         exit()
 
 def check_all(data):
 
     for line in data:
         x = line.split()
-        print x
+        print(x)
         if x[1] == 'RSUB':
             if x[2] != '0':
-                print 'RSUB dont need operand',x
+                print('RSUB dont need operand',x)
                 exit()
         elif x[1] in CONST :
             isX = check_xmode(x)
             if isX:
-                print 'error BYTE WORD no Xmode'
+                print('error BYTE WORD no Xmode')
                 exit()
             TA = x[2].split(',')
             #check_length_label(TA)
@@ -82,10 +82,10 @@ def check_all(data):
                 #print x
                 if x[1] in CONST2:
                     if TA[0][0] not in 'CX' or TA[0][-1] not in '\'':
-                        print 'error',x
+                        print('error',x)
                         exit()
                 elif x[1] in CONST3:
-                    print 'error RESB RESW dec only'
+                    print('error RESB RESW dec only')
                     exit()
             
         elif x[1] in LS:
