@@ -17,20 +17,20 @@ class Assembler:
     def __init__(self, file_name):
         try :
             assembly_file = open(file_name, 'r')
-            self.file_all_line = map(lambda x: x.strip().upper(), assembly_file.readlines())
+            self.file_all_line = [x.strip().upper() for x in assembly_file.readlines()]
             self.initOpCode()
-            print self.OPTAB
+            print(self.OPTAB)
             assembly_file.close()
         except IOError:
-            print '-' * 60
-            print "ERROR : File not found"
-            print '-' * 60
+            print('-' * 60)
+            print("ERROR : File not found")
+            print('-' * 60)
             exit()
         except :
-            print '-' * 60
-            print "ERROR : Unknow error"
+            print('-' * 60)
+            print("ERROR : Unknow error")
             print_exc(file=stdout)
-            print '-' * 60
+            print('-' * 60)
             exit()
 
     def initOpCode(self):
@@ -42,15 +42,15 @@ class Assembler:
                 self.OPTAB[key] = value
             sic_instruction_file.close()
         except IOError:
-            print '-' * 60
-            print "ERROR : sic_instructions.txt not found"
+            print('-' * 60)
+            print("ERROR : sic_instructions.txt not found")
             print_exc(file=stdout)
-            print '-' * 60
+            print('-' * 60)
             exit()
         except :
-            print '-' * 60
-            print "ERROR : Unknow error"
-            print '-' * 60
+            print('-' * 60)
+            print("ERROR : Unknow error")
+            print('-' * 60)
             exit()
 
 #### Pass 1 ####
@@ -84,9 +84,9 @@ class Assembler:
                 elif len(line_col) == 0:
                     continue
                 self.location.append(self.LOCCTR) 
-                print "NOW : " + line + " " + str(hex(self.LOCCTR)), len(self.location)
+                print("NOW : " + line + " " + hex(self.LOCCTR), len(self.location))
                 if line_col[1] == 'END':
-                    if self.SYMTAB.has_key(line_col[2].strip()):
+                    if line_col[2].strip() in self.SYMTAB:
                         self.execute = self.SYMTAB[line_col[2].strip()]
                     else :
                         if line_col[2].strip()[-1] == 'H':
@@ -104,17 +104,17 @@ class Assembler:
                 elif line_col[1] == 'BYTE':
                     #print len(line_col[2].strip()),
                     if line_col[2].strip()[0] == 'X':
-                        self.LOCCTR += (len(line_col[2].strip())-3)/2
+                        self.LOCCTR += int((len(line_col[2].strip())-3)/2)
                     elif line_col[2].strip()[0] == 'C':
                         self.LOCCTR += len(line_col[2].strip())-3
                 else:
                     self.LOCCTR += 3
             except :
-                print '-' * 60
-                print "ERROR : Something went wrong in Pass I"
-                print "Line : " + line
+                print('-' * 60)
+                print("ERROR : Something went wrong in Pass I")
+                print("Line : " + line)
                 print_exc(file=stdout)
-                print '-' * 60
+                print('-' * 60)
                 exit()
         self.length = self.LOCCTR - self.start
         
@@ -144,7 +144,7 @@ class Assembler:
                     self.bitmask += '0'
                     pass
                 elif line_col[1] == 'WORD':
-                    if self.SYMTAB.has_key(line_col[2].strip()):
+                    if line_col[2].strip() in self.SYMTAB:
                         object_code = hex(self.SYMTAB[line_col[2].strip()])[2:].zfill(6)
                         self.bitmask += '1'
                     else :
@@ -176,7 +176,7 @@ class Assembler:
                     line_col[2] = line_col[2].replace(',X','')
                     if line_col[1] == 'RSUB':
                         line_col[2] = '0'
-                    if self.SYMTAB.has_key(line_col[2].strip()):
+                    if line_col[2].strip() in self.SYMTAB:
                         object_code += bin(self.SYMTAB[line_col[2].strip()])[2:].zfill(15)
                         self.bitmask += '1'
                     else:
@@ -189,13 +189,13 @@ class Assembler:
                         self.bitmask += '0'
                     object_code = hex(int(object_code, 2))[2:].zfill(6)
                     self.object_codes.append(object_code)
-                print self.object_codes[-1], line , self.bitmask[-1], len(self.object_codes)
+                print(self.object_codes[-1], line , self.bitmask[-1], len(self.object_codes))
             except :
-                print '-' * 60
-                print "ERROR : Something went wrong in Pass II"
-                print "Line : " + line
+                print('-' * 60)
+                print("ERROR : Something went wrong in Pass II")
+                print("Line : " + line)
                 print_exc(file=stdout)
-                print '-' * 60
+                print('-' * 60)
                 exit()
             #print object_code
                 
@@ -209,7 +209,7 @@ class Assembler:
         for line in self.file_all_line:
             try :
                 line_col = line.split()
-                print len(self.location) , i, hex(self.location[i]), len(self.object_codes),line
+                print(len(self.location) , i, hex(self.location[i]), len(self.object_codes),line)
                 if len(line_col) == 1:
                     line_col = [''] + line_col + ['']
                 elif len(line_col) == 2:
@@ -227,24 +227,24 @@ class Assembler:
                     listing_list.append('\t' + tmp)
                 i += 1
             except:
-                print '-' * 60
-                print "ERROR : Cannot create Listing file"
-                print "Line : " + line
+                print('-' * 60)
+                print("ERROR : Cannot create Listing file")
+                print("Line : " + line)
                 print_exc(file=stdout)
-                print '-' * 60
+                print('-' * 60)
                 exit()
         write_file = open(argv[1][:-4]+'.lst','w')
         for line in listing_list:
             write_file.write(line+'\n')
         write_file.close()
-        print listing_list
+        print(listing_list)
 
     def createObjectFile(self):
         i = 0
         object_line = ''
         object_list = []
         point = 0
-        print "ABSOLUTE ~"
+        print("ABSOLUTE ~")
         for line in self.file_all_line:
             try:
                 line_col = line.split()
@@ -263,19 +263,19 @@ class Assembler:
                     object_line = ''
                 elif line_col[1] == 'END':
                     if object_line != '':
-                        object_line = 'T' + hex(point)[2:].zfill(6) + hex(len(object_line)/2)[2:].zfill(2) +'000' + object_line
+                        object_line = 'T' + hex(point)[2:].zfill(6) + hex(int(len(object_line)/2))[2:].zfill(2) +'000' + object_line
                         object_list.append(object_line)
                         object_line = ''
                     object_line = 'E' + hex(self.execute)[2:].zfill(6)
                     object_list.append(object_line)
                 elif line_col[1] == 'RESW' or line_col[1] == 'RESB':
                     if object_line != '':
-                        object_line = 'T' + hex(point)[2:].zfill(6) + hex(len(object_line)/2)[2:].zfill(2) +'000' + object_line
+                        object_line = 'T' + hex(point)[2:].zfill(6) + hex(int(len(object_line)/2))[2:].zfill(2) +'000' + object_line
                         object_list.append(object_line)
                         object_line = ''
                 else:
                     if len(object_line) + len(self.object_codes[i]) > 60:
-                        object_line = 'T' + hex(point)[2:].zfill(6) + hex(len(object_line)/2)[2:].zfill(2) +'000' + object_line
+                        object_line = 'T' + hex(point)[2:].zfill(6) + hex(int(len(object_line)/2))[2:].zfill(2) +'000' + object_line
                         object_list.append(object_line)
                         object_line = ''
                     if object_line == '':
@@ -283,19 +283,19 @@ class Assembler:
                     object_line += self.object_codes[i]
                 i += 1
             except :
-                print '-' * 60
-                print "ERROR : Cannot create Object file (absolute)"
-                print "Line : " + line
+                print('-' * 60)
+                print("ERROR : Cannot create Object file (absolute)")
+                print("Line : " + line)
                 print_exc(file=stdout)
-                print '-' * 60
+                print('-' * 60)
                 exit()
 
-        object_list = map(lambda x:x.upper(),object_list)
+        object_list = [x.upper() for x in object_list]
         write_file = open(argv[1][:-4]+'.obj','w')
         for line in object_list:
             write_file.write(line+'\n')
         write_file.close()
-        print object_list
+        print(object_list)
 
     def createObjectFileRelocatable(self):
         i = 0
@@ -303,7 +303,7 @@ class Assembler:
         bitmask_line = ''
         object_list = []
         point = 0
-        print "RELOCATABLE ~"
+        print("RELOCATABLE ~")
         for line in self.file_all_line:
             try:
                 line_col = line.split()
@@ -337,7 +337,7 @@ class Assembler:
                         object_list.append(object_line)
                         object_line = ''
                 elif line_col[1] == 'WORD' or line_col[1] == 'BYTE':
-                    print 'YYYY' , object_line
+                    print('YYYY' , object_line)
                     if object_line != '':
                         calc_bitmask = hex(int(bitmask_line + '0'*(12-len(bitmask_line)), 2))[2:].zfill(3).upper()
                         object_line = 'T' + hex(point)[2:].zfill(6) + hex(len(object_line)/2)[2:].zfill(2) + calc_bitmask + object_line
@@ -363,38 +363,38 @@ class Assembler:
                     bitmask_line += self.bitmask[i]
                 i += 1
             except :
-                print '-' * 60
-                print "ERROR : Cannot create Object file (relocatable)"
-                print "Line : " + line
+                print('-' * 60)
+                print("ERROR : Cannot create Object file (relocatable)")
+                print("Line : " + line)
                 print_exc(file=stdout)
-                print '-' * 60
+                print('-' * 60)
                 exit()
 
-        object_list = map(lambda x:x.upper(),object_list)
+        object_list = [x.upper() for x in object_list]
         write_file = open(argv[1][:-4]+'.obj','w')
         for line in object_list:
             write_file.write(line+'\n')
         write_file.close()
-        print object_list
+        print(object_list)
 
 if len(argv) <= 1:
-    print '-' * 60
-    print "ERROR : Invalid argrument"
-    print '-' * 60
+    print('-' * 60)
+    print("ERROR : Invalid argrument")
+    print('-' * 60)
     exit()
 if argv[1][-4:].upper() != '.ASM':
-    print '-' * 60
-    print "ERROR : Please Input file .ASM"
-    print '-' * 60
+    print('-' * 60)
+    print("ERROR : Please Input file .ASM")
+    print('-' * 60)
     exit()
 obj = Assembler(argv[1])
 obj.passOne()
-print obj.SYMTAB
+print(obj.SYMTAB)
 obj.passTwo()
-print obj.file_all_line ,len(obj.file_all_line)
-print obj.object_codes, len(obj.object_codes)
-print obj.length
-print obj.location, len(obj.location)
+print(obj.file_all_line ,len(obj.file_all_line))
+print(obj.object_codes, len(obj.object_codes))
+print(obj.length)
+print(obj.location, len(obj.location))
 obj.createListingFile()
 if obj.start != 0:
     obj.createObjectFile()
